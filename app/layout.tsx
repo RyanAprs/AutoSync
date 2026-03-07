@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HelloFriday — Design Agency Platform",
+  title: "AutoSync — Internal Management Platform",
   description: "Internal task management, design submissions, and analytics",
 };
 

@@ -1,6 +1,3 @@
-// HelloFriday Design Agency Platform — Prisma Schema
-// PostgreSQL
-
 generator client {
   provider = "prisma-client-js"
 }
