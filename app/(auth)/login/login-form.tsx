@@ -13,7 +13,7 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(
-    errorParam ? "Sign-in failed. Check your credentials." : null
+    errorParam ? "Sign-in failed. Check your credentials." : null,
   );
   const [loading, setLoading] = useState(false);
 
@@ -45,7 +45,7 @@ export function LoginForm() {
   return (
     <div className="w-full max-w-sm space-y-8 rounded-xl border bg-white p-8 shadow-sm dark:bg-zinc-900 dark:border-zinc-800">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">HelloFriday</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">AutoSync</h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
           Sign in to your account
         </p>

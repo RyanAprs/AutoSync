@@ -52,7 +52,7 @@ export default function RegisterPage() {
           Create account
         </h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Register for HelloFriday
+          Register for AutoSync
         </p>
       </div>
 

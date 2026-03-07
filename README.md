@@ -1,4 +1,4 @@
-# AutoSycn
+# AutoSync
 
 ## Overview
 
