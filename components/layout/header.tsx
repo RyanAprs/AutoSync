@@ -8,8 +8,8 @@ export async function Header() {
   const session = (await getServerSession(authOptions)) as Session | null;
 
   return (
-    <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-950">
-      <div className="flex items-center gap-4">
+    <header className="flex h-14 items-center justify-between border-b border-zinc-200 bg-white px-6 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="flex items-center gap-2">
         <NotificationBell />
       </div>
       <UserMenu session={session} />

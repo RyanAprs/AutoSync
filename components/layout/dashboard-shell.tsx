@@ -3,11 +3,11 @@ import { Header } from "./header";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-900">
       <Sidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
         <Header />
-        <main className="flex-1 p-6">{children}</main>
+        <main className="min-h-0 flex-1 p-6">{children}</main>
       </div>
     </div>
   );
