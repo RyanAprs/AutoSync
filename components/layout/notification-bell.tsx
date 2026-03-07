@@ -2,7 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useNotifications, type NotificationItem } from "@/hooks/use-notifications";
+import {
+  useNotifications,
+  type NotificationItem,
+} from "@/hooks/use-notifications";
 import { cn } from "@/lib/utils";
 
 function formatTime(iso: string): string {
@@ -68,7 +71,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+        <div className="absolute -right-4 top-full z-50 mt-2 w-80 overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
           <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               Notifications
@@ -124,7 +127,7 @@ function NotificationRow({
     <div
       className={cn(
         "block px-4 py-3 text-left transition hover:bg-zinc-50 dark:hover:bg-zinc-800/50",
-        !item.isRead && "bg-zinc-50/80 dark:bg-zinc-800/30"
+        !item.isRead && "bg-zinc-50/80 dark:bg-zinc-800/30",
       )}
     >
       <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
