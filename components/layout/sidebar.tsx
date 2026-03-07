@@ -3,8 +3,8 @@ import { getServerSession } from "next-auth";
 import type { Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getNavItemsForRole } from "@/lib/nav-config";
-import { NavIcon } from "./sidebar-icons";
 import type { AppRole } from "@/types/auth";
+import { SidebarNav } from "./sidebar-helper";
 
 export async function Sidebar() {
   const session = (await getServerSession(authOptions)) as Session | null;
@@ -21,20 +21,7 @@ export async function Sidebar() {
           HelloFriday
         </Link>
       </div>
-      <nav className="flex-1 space-y-0.5 p-3">
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-          >
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-              <NavIcon name={item.icon} />
-            </span>
-            {item.label}
-          </Link>
-        ))}
-      </nav>
+      <SidebarNav navItems={navItems} />
     </aside>
   );
 }
