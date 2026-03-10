@@ -1,7 +1,8 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import {
   ArrowLeft,
   Users,
@@ -9,16 +10,22 @@ import {
   Clock,
   Columns3,
   Loader2,
+  UserPlus,
+  ShieldOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBoard } from "@/hooks/use-board";
 import { KanbanBoard } from "@/components/kanban/board";
+import { InviteMemberDialog } from "@/components/dashboard/invite-member-dialog";
 
 export default function BoardPage({ params }: { params: Promise<{ boardId: string }> }) {
   const { boardId } = use(params);
   const { data: board, isLoading, error } = useBoard(boardId);
+  const { data: session } = useSession();
+  const [inviteOpen, setInviteOpen] = useState(false);
+
+  const currentUserId = (session?.user as { id?: string })?.id;
 
   if (isLoading) {
     return (
@@ -39,14 +46,21 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
     );
   }
 
+  // Access denied or not found
   if (error || !board) {
+    const is403 = error?.message?.includes("403") || error?.message?.includes("not found");
     return (
       <div className="flex flex-col items-center justify-center py-20">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+          <ShieldOff className="h-8 w-8 text-zinc-400 dark:text-zinc-500" />
+        </div>
         <h2 className="mb-2 text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-          Board not found
+          {is403 ? "Access Denied" : "Board not found"}
         </h2>
         <p className="mb-4 text-zinc-500 dark:text-zinc-400">
-          This board may have been deleted or you don't have access.
+          {is403
+            ? "You don't have permission to view this board."
+            : "This board may have been deleted or you don't have access."}
         </p>
         <Button asChild variant="outline">
           <Link href="/boards">
@@ -58,7 +72,8 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
     );
   }
 
-  const ownerMember = board.members.find((m) => m.role === "owner");
+  const currentMember = board.members.find((m) => m.userId === currentUserId);
+  const isOwner = currentMember?.role === "owner";
   const totalCards = board.columns.reduce((sum, c) => sum + c._count.cards, 0);
 
   return (
@@ -112,6 +127,18 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
             )}
           </div>
 
+          {/* Invite button — owner only */}
+          {isOwner && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setInviteOpen(true)}
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Invite
+            </Button>
+          )}
+
           <Button asChild variant="outline" size="sm">
             <Link href={`/boards/${boardId}/settings`}>
               <Settings className="mr-2 h-4 w-4" />
@@ -137,6 +164,12 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
           <KanbanBoard />
         )}
       </div>
+
+      <InviteMemberDialog
+        boardId={boardId}
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+      />
     </div>
   );
 }

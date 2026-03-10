@@ -56,6 +56,46 @@ async function updateBoardApi({ boardId, name }: { boardId: string; name: string
   }
 }
 
+// ─── Member API helpers ──────────────────────────────────────────────────────
+
+async function inviteMemberApi({
+  boardId,
+  email,
+  role,
+}: {
+  boardId: string;
+  email: string;
+  role: "editor" | "viewer";
+}): Promise<void> {
+  const res = await fetch(`/api/boards/${boardId}/invite`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, role }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Failed to invite member" }));
+    throw new Error(err.error ?? "Failed to invite member");
+  }
+}
+
+async function removeMemberApi({
+  boardId,
+  userId,
+}: {
+  boardId: string;
+  userId: string;
+}): Promise<void> {
+  const res = await fetch(`/api/boards/${boardId}/members`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Failed to remove member" }));
+    throw new Error(err.error ?? "Failed to remove member");
+  }
+}
+
 // ─── Hooks ──────────────────────────────────────────────────────────────────
 
 export function useBoards() {
@@ -102,6 +142,29 @@ export function useUpdateBoard() {
     mutationFn: updateBoardApi,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: BOARDS_KEY });
+    },
+  });
+}
+
+export function useInviteMember(boardId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (vars: { email: string; role: "editor" | "viewer" }) =>
+      inviteMemberApi({ boardId, ...vars }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [...BOARDS_KEY, boardId] });
+    },
+  });
+}
+
+export function useRemoveMember(boardId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (userId: string) => removeMemberApi({ boardId, userId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [...BOARDS_KEY, boardId] });
     },
   });
 }
