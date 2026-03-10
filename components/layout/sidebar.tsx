@@ -12,13 +12,13 @@ export async function Sidebar() {
   const navItems = getNavItemsForRole(role);
 
   return (
-    <aside className="flex w-64 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <aside className="flex w-64 flex-col border-r border-zinc-200 bg-white darkborder-zinc-800 dark:bg-zinc-950">
       <div className="flex h-14 items-center border-b border-zinc-200 px-4 dark:border-zinc-800">
         <Link
           href="/dashboard"
           className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-100"
         >
-          HelloFriday
+          AutoSync
         </Link>
       </div>
       <SidebarNav navItems={navItems} />
