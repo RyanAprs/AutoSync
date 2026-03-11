@@ -12,6 +12,30 @@ export type BoardListItem = {
   memberCount: number;
 };
 
+export type CardDetail = {
+  id: string;
+  columnId: string;
+  title: string;
+  description: string | null;
+  position: number;
+  deadline: string | null;
+  assignee: {
+    id: string;
+    name: string | null;
+    email: string;
+    image: string | null;
+  } | null;
+  labels?: { id: string; name: string; color: string }[];
+  _count?: { comments: number; attachments: number };
+};
+
+export type ColumnDetail = {
+  id: string;
+  title: string;
+  position: number;
+  cards: CardDetail[];
+};
+
 export type BoardDetail = {
   id: string;
   name: string;
@@ -28,13 +52,59 @@ export type BoardDetail = {
       image: string | null;
     };
   }[];
-  columns: {
-    id: string;
-    title: string;
-    position: number;
-    _count: { cards: number };
-  }[];
+  columns: (ColumnDetail & { _count: { cards: number } })[];
 };
+
+// ─── Label / Comment / Attachment types ─────────────────────────────────────
+
+export type LabelDetail = {
+  id: string;
+  name: string;
+  color: string;
+};
+
+export type CommentDetail = {
+  id: string;
+  content: string;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    image: string | null;
+  };
+};
+
+export type AttachmentDetail = {
+  id: string;
+  name: string;
+  url: string;
+  mimeType: string | null;
+  sizeBytes: number | null;
+  createdAt: string;
+};
+
+export type CardFullDetail = {
+  id: string;
+  columnId: string;
+  columnTitle: string;
+  boardId: string;
+  title: string;
+  description: string | null;
+  position: number;
+  deadline: string | null;
+  assignee: {
+    id: string;
+    name: string | null;
+    email: string;
+    image: string | null;
+  } | null;
+  labels: LabelDetail[];
+  comments: CommentDetail[];
+  attachments: AttachmentDetail[];
+};
+
+// ─── Board mutation types ───────────────────────────────────────────────────
 
 export type CreateBoardRequest = {
   name: string;

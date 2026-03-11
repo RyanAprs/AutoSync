@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { boardService } from "@/services/board.service";
-import { columnService } from "@/services/column.service";
+import { labelService } from "@/services/label.service";
 
 export async function GET(
   _req: Request,
@@ -17,10 +17,10 @@ export async function GET(
 
   const role = await boardService.getMemberRole(boardId, userId);
   if (!role)
-    return NextResponse.json({ error: "Not a member" }, { status: 403 });
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const columns = await columnService.listByBoard(boardId);
-  return NextResponse.json({ columns });
+  const labels = await labelService.listByBoard(boardId);
+  return NextResponse.json(labels);
 }
 
 export async function POST(
@@ -38,17 +38,19 @@ export async function POST(
   if (!role || role === "viewer")
     return NextResponse.json({ error: "No permission" }, { status: 403 });
 
-  let body: { title?: string };
+  let body: { name?: string; color?: string };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const title = body.title?.trim();
-  if (!title)
-    return NextResponse.json({ error: "Title is required" }, { status: 400 });
+  if (!body.color)
+    return NextResponse.json({ error: "color is required" }, { status: 400 });
 
-  const column = await columnService.create(boardId, { title });
-  return NextResponse.json(column, { status: 201 });
+  const label = await labelService.create(boardId, {
+    name: body.name ?? "",
+    color: body.color,
+  });
+  return NextResponse.json(label, { status: 201 });
 }

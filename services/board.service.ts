@@ -38,7 +38,17 @@ export const boardService = {
         },
         columns: {
           orderBy: { position: "asc" },
-          include: { _count: { select: { cards: true } } },
+          include: {
+            _count: { select: { cards: true } },
+            cards: {
+              orderBy: { position: "asc" },
+              include: {
+                assignee: { select: { id: true, name: true, email: true, image: true } },
+                labels: { include: { label: true } },
+                _count: { select: { comments: true, attachments: true } },
+              },
+            },
+          },
         },
       },
     });
@@ -61,6 +71,21 @@ export const boardService = {
         title: c.title,
         position: c.position,
         _count: c._count,
+        cards: c.cards.map((card) => ({
+          id: card.id,
+          columnId: card.columnId,
+          title: card.title,
+          description: card.description,
+          position: card.position,
+          deadline: card.deadline?.toISOString() ?? null,
+          assignee: card.assignee,
+          labels: card.labels.map((cl) => ({
+            id: cl.label.id,
+            name: cl.label.name,
+            color: cl.label.color,
+          })),
+          _count: card._count,
+        })),
       })),
     };
   },

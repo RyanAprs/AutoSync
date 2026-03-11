@@ -2,53 +2,48 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { boardService } from "@/services/board.service";
-import { columnService } from "@/services/column.service";
+import { attachmentService } from "@/services/attachment.service";
 
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<{ boardId: string }> }
+  { params }: { params: Promise<{ boardId: string; cardId: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { boardId } = await params;
+  const { boardId, cardId } = await params;
   const userId = (session.user as { id: string }).id;
 
   const role = await boardService.getMemberRole(boardId, userId);
   if (!role)
-    return NextResponse.json({ error: "Not a member" }, { status: 403 });
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const columns = await columnService.listByBoard(boardId);
-  return NextResponse.json({ columns });
+  const attachments = await attachmentService.list(cardId);
+  return NextResponse.json(attachments);
 }
 
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ boardId: string }> }
+  { params }: { params: Promise<{ boardId: string; cardId: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { boardId } = await params;
+  const { boardId, cardId } = await params;
   const userId = (session.user as { id: string }).id;
 
   const role = await boardService.getMemberRole(boardId, userId);
   if (!role || role === "viewer")
     return NextResponse.json({ error: "No permission" }, { status: 403 });
 
-  let body: { title?: string };
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
+  const formData = await req.formData();
+  const file = formData.get("file") as File | null;
 
-  const title = body.title?.trim();
-  if (!title)
-    return NextResponse.json({ error: "Title is required" }, { status: 400 });
+  if (!file)
+    return NextResponse.json({ error: "file is required" }, { status: 400 });
 
-  const column = await columnService.create(boardId, { title });
-  return NextResponse.json(column, { status: 201 });
+  const attachment = await attachmentService.create(cardId, file);
+  return NextResponse.json(attachment, { status: 201 });
 }
