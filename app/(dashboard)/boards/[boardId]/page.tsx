@@ -7,11 +7,9 @@ import {
   ArrowLeft,
   Users,
   Settings,
-  Clock,
-  Columns3,
-  Loader2,
   UserPlus,
   ShieldOff,
+  LayoutGrid,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,17 +27,14 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-9 w-9" />
-          <div className="space-y-2">
-            <Skeleton className="h-7 w-48" />
-            <Skeleton className="h-4 w-32" />
-          </div>
+      <div className="flex h-full flex-col">
+        <div className="flex items-center gap-4 px-2 pb-4">
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-6 w-40" />
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-1 gap-3 px-2">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-64 w-72 rounded-lg" />
+            <Skeleton key={i} className="h-48 w-[272px] shrink-0 rounded-xl" />
           ))}
         </div>
       </div>
@@ -51,18 +46,18 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
     const is403 = error?.message?.includes("403") || error?.message?.includes("not found");
     return (
       <div className="flex flex-col items-center justify-center py-20">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
           <ShieldOff className="h-8 w-8 text-zinc-400 dark:text-zinc-500" />
         </div>
         <h2 className="mb-2 text-xl font-semibold text-zinc-900 dark:text-zinc-100">
           {is403 ? "Access Denied" : "Board not found"}
         </h2>
-        <p className="mb-4 text-zinc-500 dark:text-zinc-400">
+        <p className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
           {is403
             ? "You don't have permission to view this board."
             : "This board may have been deleted or you don't have access."}
         </p>
-        <Button asChild variant="outline">
+        <Button asChild variant="outline" size="sm">
           <Link href="/boards">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Boards
@@ -74,95 +69,83 @@ export default function BoardPage({ params }: { params: Promise<{ boardId: strin
 
   const currentMember = board.members.find((m) => m.userId === currentUserId);
   const isOwner = currentMember?.role === "owner";
-  const totalCards = board.columns.reduce((sum, c) => sum + c._count.cards, 0);
 
   return (
-    <div className="space-y-6">
-      {/* Board header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-3">
-          <Button asChild variant="ghost" size="icon" className="mt-0.5 shrink-0">
+    <div className="flex h-full flex-col overflow-hidden -m-6">
+      {/* Compact board header */}
+      <div className="flex items-center justify-between border-b border-zinc-200/60 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm px-6 py-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <Button asChild variant="ghost" size="icon" className="h-8 w-8 shrink-0">
             <Link href="/boards">
               <ArrowLeft className="h-4 w-4" />
-              <span className="sr-only">Back to boards</span>
+              <span className="sr-only">Back</span>
             </Link>
           </Button>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-              {board.name}
-            </h1>
-            <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-500 dark:text-zinc-400">
-              <span className="flex items-center gap-1.5">
-                <Users className="h-3.5 w-3.5" />
-                {board.members.length} member{board.members.length !== 1 ? "s" : ""}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Columns3 className="h-3.5 w-3.5" />
-                {board.columns.length} column{board.columns.length !== 1 ? "s" : ""}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5" />
-                {totalCards} card{totalCards !== 1 ? "s" : ""}
-              </span>
+
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white shrink-0">
+              <LayoutGrid className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                {board.name}
+              </h1>
+              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <span>{board.columns.length} lists</span>
+                <span className="text-zinc-300 dark:text-zinc-600">·</span>
+                <span>{board.columns.reduce((s, c) => s + c._count.cards, 0)} cards</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Member avatars */}
-          <div className="flex -space-x-2">
+          <div className="hidden sm:flex -space-x-1.5">
             {board.members.slice(0, 4).map((m) => (
               <div
                 key={m.id}
-                className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-blue-500 to-purple-500 text-xs font-medium text-white dark:border-zinc-900"
+                className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white dark:border-zinc-900 bg-gradient-to-br from-blue-500 to-purple-500 text-[10px] font-semibold text-white"
                 title={m.user.name ?? m.user.email}
               >
                 {(m.user.name ?? m.user.email).charAt(0).toUpperCase()}
               </div>
             ))}
             {board.members.length > 4 && (
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-zinc-200 text-xs font-medium text-zinc-600 dark:border-zinc-900 dark:bg-zinc-700 dark:text-zinc-300">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white dark:border-zinc-900 bg-zinc-200 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
                 +{board.members.length - 4}
               </div>
             )}
           </div>
 
-          {/* Invite button — owner only */}
           {isOwner && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => setInviteOpen(true)}
+              className="h-8 gap-1.5 text-xs"
             >
-              <UserPlus className="mr-2 h-4 w-4" />
-              Invite
+              <UserPlus className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Invite</span>
             </Button>
           )}
 
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="ghost" size="icon" className="h-8 w-8">
             <Link href={`/boards/${boardId}/settings`}>
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
+              <Settings className="h-4 w-4" />
+              <span className="sr-only">Settings</span>
             </Link>
           </Button>
         </div>
       </div>
 
-      {/* Kanban area */}
-      <div className="min-h-[400px] rounded-xl border border-zinc-200 bg-zinc-50/50 p-4 dark:border-zinc-800 dark:bg-zinc-900/50">
-        {board.columns.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Columns3 className="mb-4 h-12 w-12 text-zinc-300 dark:text-zinc-600" />
-            <h3 className="mb-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              No columns yet
-            </h3>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Add your first column to start managing tasks.
-            </p>
-          </div>
-        ) : (
-          <KanbanBoard />
-        )}
+      {/* Kanban area — fills remaining space with contained overflow */}
+      <div className="flex-1 overflow-hidden bg-gradient-to-br from-zinc-50 via-white to-zinc-100/50 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-800/50">
+        <KanbanBoard
+          board={board}
+          boardId={boardId}
+          canEdit={currentMember?.role !== "viewer"}
+        />
       </div>
 
       <InviteMemberDialog

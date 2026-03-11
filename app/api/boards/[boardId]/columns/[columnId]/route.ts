@@ -4,34 +4,15 @@ import { authOptions } from "@/lib/auth";
 import { boardService } from "@/services/board.service";
 import { columnService } from "@/services/column.service";
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ boardId: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const { boardId } = await params;
-  const userId = (session.user as { id: string }).id;
-
-  const role = await boardService.getMemberRole(boardId, userId);
-  if (!role)
-    return NextResponse.json({ error: "Not a member" }, { status: 403 });
-
-  const columns = await columnService.listByBoard(boardId);
-  return NextResponse.json({ columns });
-}
-
-export async function POST(
+export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ boardId: string }> }
+  { params }: { params: Promise<{ boardId: string; columnId: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session?.user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { boardId } = await params;
+  const { boardId, columnId } = await params;
   const userId = (session.user as { id: string }).id;
 
   const role = await boardService.getMemberRole(boardId, userId);
@@ -49,6 +30,25 @@ export async function POST(
   if (!title)
     return NextResponse.json({ error: "Title is required" }, { status: 400 });
 
-  const column = await columnService.create(boardId, { title });
-  return NextResponse.json(column, { status: 201 });
+  const updated = await columnService.update(columnId, { title });
+  return NextResponse.json(updated);
+}
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ boardId: string; columnId: string }> }
+) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { boardId, columnId } = await params;
+  const userId = (session.user as { id: string }).id;
+
+  const role = await boardService.getMemberRole(boardId, userId);
+  if (!role || role === "viewer")
+    return NextResponse.json({ error: "No permission" }, { status: 403 });
+
+  await columnService.delete(columnId);
+  return new NextResponse(null, { status: 204 });
 }
